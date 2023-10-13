@@ -1,4 +1,5 @@
 @if (count($data) > 0)
+{{-- @dd($data) --}}
     <div class="container">
         <table class="table table-success table-striped container mt-5">
             <tr>

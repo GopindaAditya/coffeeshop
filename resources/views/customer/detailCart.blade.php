@@ -5,6 +5,7 @@
         <button class="btn btn-primary"><a href="{{ url('/customer/menu') }}" style="color: white;">Menu</a></button>
     </div>
     <div id="read" class="mt-3 "></div>
+    <script src="https://cdn.rawgit.com/davidshimjs/qrcodejs/gh-pages/qrcode.min.js"></script>
     <script>
         $(document).ready(function() {
             read();
@@ -15,7 +16,7 @@
                 $("#read").html(data);
             });
         }
-        
+
         function destroy() {
             var selectedItems = [];
             $('.item-checkbox:checked').each(function() {
@@ -60,6 +61,8 @@
                                 timer: 1500,
                                 buttons: false,
                             });
+
+
                         },
                         error: function(xhr, status, error) {
                             console.log(xhr.responseText);
@@ -93,25 +96,23 @@
             });
 
             $.ajax({
-                url: "{{ url('/customer/cekout') }}/",
-                method: "POST",
-                data: JSON.stringify(formData), // Mengonversi objek formData ke dalam format JSON
-                contentType: "application/json", // Tentukan tipe konten sebagai JSON
-                success: function(response) {
-                    read();
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Tunggu konfirmasi dari kasir',
-                        showConfirmButton: false,
-                        timer: 1500
+                    url: "{{ url('/customer/cekout') }}/",
+                    method: "POST",
+                    data: JSON.stringify(formData),
+                    contentType: "application/json",
+                    success: function(response) {                        
+                            var qrCodeText = '';
+                            response.items.forEach(function(item) {
+                                qrCodeText += 'id produk: '+item.name + '\nJumlah Beli:' + item.quantity + '\nHarga:' + item.price +
+                                    '\n';
+                            });
+                            
+                            window.location = "{{ route('qrcode') }}?data=" + encodeURIComponent(qrCodeText);
+                        },
+                        error: function(xhr, status, error) {
+                            console.log(xhr.responseText);
+                        }
                     });
-                    $("#read").html(response);
-
-                },
-                error: function(xhr, status, error) {
-                    console.log(xhr.responseText);
-                }
-            });
-        }
+            }
     </script>
 @endsection

@@ -22,12 +22,6 @@ class CustomerController extends Controller
         return view('customer.dataUser.read', compact('data'));
     }
 
-    function edit(){
-        $user = Auth::user();
-        $data = User::find($user->id);
-        return view('customer.dataUser.edit', compact('data'));
-    }
-
     function update(Request $request) {
         $cradential = $request->validate([
             'name' => 'required',

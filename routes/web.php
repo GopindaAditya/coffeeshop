@@ -33,7 +33,6 @@ Route::post('/search', [ProdukController::class, 'search'])->name('search');
 //costomer route
 Route::get('/customer/dahsboard', [CustomerController::class, 'index'])->name('customer');
 Route::get('/customer/read',[CustomerController::class,'read'])->name('customerDetail');
-Route::get('/customer/edit', [CustomerController::class, 'edit'])->name('customer.edit');
 Route::post('/customer/update', [CustomerController::class, 'update'])->name('customer.update');
 Route::post('/hitung-harga', [CartController::class, 'hitungHarga']);
 Route::get('/customer/menu', [ProdukController::class, 'index'])->name('customer.menu');
@@ -43,6 +42,7 @@ Route::get('/customer/cart/{id}', [CartController::class, 'show'])->name('cart')
 Route::post('/customer/addCart/{id}', [CartController::class, 'addCart'])->name('addCart'); // Ubah nama rute menjadi 'addToCart'
 Route::post('/customer/cart/delete', [CartController::class, 'destroy'])->name('delCart'); // Ubah nama rute menjadi 'addToCart'
 Route::post('/customer/cekout', [CartController::class, 'cekout'])->name('cekout');
+Route::get('/customer/qrcode', [CartController::class, 'qrcode'])->name('qrcode');
 
 
 //owner route

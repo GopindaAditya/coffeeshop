@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use App\Models\Detail_penjualan;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class PenjualanController extends Controller
 {
@@ -118,6 +119,68 @@ Terima kasih',
             $menu->stok = $stok;
             $menu->save();
             Detail_Penjualan::where('id_transaksi', $pen->id)->delete();
+            $curl = curl_init();
+
+            curl_setopt_array($curl, array(
+                CURLOPT_URL => 'https://api.fonnte.com/send',
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_ENCODING => '',
+                CURLOPT_MAXREDIRS => 10,
+                CURLOPT_TIMEOUT => 0,
+                CURLOPT_FOLLOWLOCATION => true,
+                CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+                CURLOPT_CUSTOMREQUEST => 'POST',
+                CURLOPT_POSTFIELDS => array(
+                    'target' => $user->telepon,
+                    'message' => 'COFFEE MAS BROO
+Jl. Paingan, Krodan, Maguwoharjo, Kec. Depok, Kabupaten Sleman, Daerah Istimewa Yogyakarta
+085738815164
+                    
+Nomer Nota : '
+.$pen->id. '
+                    
+Kasir : '
+.$kasirId->name.'
+                    
+Pelanggan Yth : '
+.$user->name. '
+                    
+Tanggal :'. $pen->updated_at .'
+                    
+                    
+======================
+Detail pesanan: 
+                    
+❌'. $menu ->name. '
+  '. $data ->harga_penjualan. '
+  '. $data ->jumlah.'
+                      
+Ket : 
+                    
+==============
+Detail biaya : 
+Total tagihan : Rp'.$total.'
+                    
+Pembayaran: 
+💵 Tunai Rp'.$total.'
+                    
+Status: Ditolak
+=================
+                    
+Terima kasih',
+                    'countryCode' => '62',
+                    //optional
+                ),
+                CURLOPT_HTTPHEADER => array(
+                    'Authorization: Ph2GJQCYaeAs7yCy8HTW' //change TOKEN to your actual token
+                ),
+            )
+            );
+
+            $response = curl_exec($curl);
+
+            curl_close($curl);
+
             return response()->json('pesanan ditolak', 200);
         }
     }
@@ -141,22 +204,11 @@ Terima kasih',
         return view('kasir.detailNota', compact('pen', 'data', 'menu'));
     }
 
-    public function laporan() {
-        $penjualanData = [];     
-        $penjualanProduk = [];
-        $menu = Produks::all();        
-        foreach ($menu as $produk) {
-            // Mengambil total penjualan untuk setiap produk dari tabel detail_penjualan
-            $totalPenjualan = Detail_penjualan::where('id_menu', $produk->id)->sum('jumlah');
-            $penjualanProduk[] = $totalPenjualan;
-        }
-        $data = Detail_penjualan::selectRaw('DATE(updated_at) as tanggal, COUNT(*) as jumlah_transaksi')
-                                ->groupBy('tanggal')
-                                ->get();
-        foreach ($data as $key) {            
-            $penjualanData[] = ['x' => strtotime($key->tanggal) * 1000, 'y' => $key->jumlah_transaksi];            
-        }        
-        return view('owner.laporan', compact('penjualanData', 'menu', 'penjualanProduk'));
+    function qrCode() {
+        
+        return QrCode::generate(
+            'id',
+        );
     }
     
 }

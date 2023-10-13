@@ -22,7 +22,6 @@
         <label for="rpPassword">repeat password</label>
         <input type="password" name="rpPassword" id="rpPassword"><br>
         <input type="submit" value="register">
-    </form>
-    <p><a href="{{ route('register') }}">don't have an account</a></p>
+    </form>    
 </body>
 </html>

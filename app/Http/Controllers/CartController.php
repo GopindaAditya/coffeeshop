@@ -3,11 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\Cart;
-use App\Models\Detail_penjualan;
 use App\Models\Produks;
 use App\Models\Penjualan;
 use Illuminate\Http\Request;
+use App\Models\Detail_penjualan;
 use Illuminate\Support\Facades\Auth;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
 class CartController extends Controller
@@ -33,7 +34,7 @@ class CartController extends Controller
     function show($id)
     {
         $data = Produks::find($id);
-        return view('customer.cart', compact('data'));
+        return view('customer.shopping-cart', compact('data'));
     }
 
 
@@ -85,16 +86,22 @@ class CartController extends Controller
             return response()->json(['error' => 'Invalid id_transaksi'], 400);
         }
 
-        $selectedItems = $request->input('items');    
-
+        $selectedItems = $request->input('items');
+        $items = [];
         foreach ($selectedItems as $itemId) {
             $dataMenu = Cart::find($itemId);
-
+            $total = $dataMenu->harga * $dataMenu->jumlah;
             if (!$dataMenu) {
                 return response()->json(['error' => 'Item not found'], 404);
             }
 
-            $total = $dataMenu->harga * $dataMenu->jumlah;
+            $items[] = [
+                'name' => $dataMenu->id_user,
+                'produk' => $dataMenu->id_produk,
+                'quantity' => $dataMenu->jumlah,
+                'price' => $total,
+            ];
+
             $data = new Detail_penjualan;
             $data->id_transaksi = $id_transaksi; // Assign the valid integer value
             $data->id_menu = $dataMenu->id_produk;
@@ -108,11 +115,15 @@ class CartController extends Controller
 
             $dataMenu->delete();
         }
-
-        return response()->json(['message' => 'Items checked out successfully'], 200);
+        $response = ['items' => $items]; // Create a response array with 'items' key
+        return response()->json($response); // Send JSON response to the client
     }
 
-
+    function qrcode(Request $request)
+    {
+        $qrCodeData = $request->input('data');
+        return view('customer.pembayaran', compact('qrCodeData'));
+    }
 
     function destroy(Request $request)
     {
